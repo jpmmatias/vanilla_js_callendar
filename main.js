@@ -4,7 +4,12 @@ let events = localStorage.getItem('events')
 	? JSON.parse(localStorage.getItem('events'))
 	: [];
 
-const calendar = document.querySelector('#calendar');
+const calendar = document.getElementById('calendar');
+const newEventModal = document.getElementById('newEventModal');
+const deleteModal = document.getElementById('deleteEventModal');
+const modalBackDrop = document.getElementById('modalBackDrop');
+const titleInputEvent = document.getElementById('eventTitleInput');
+
 const weekdays = [
 	'Domingo',
 	'Segunda-feira',
@@ -25,7 +30,6 @@ function load() {
 	const day = date.getDate();
 	const month = date.getMonth();
 	const year = date.getFullYear();
-
 	const firstDayOfMonth = new Date(year, month, 1);
 	const daysInMonth = new Date(year, month + 1, 0).getDate();
 
@@ -51,7 +55,16 @@ function load() {
 		if (i > paddingDays) {
 			daySquare.innerText = i - paddingDays;
 
-			daySquare.addEventListener('click', () => console.log('click'));
+			const modalDay = `${i - paddingDays}/${month + 1}/${year}`;
+			const eventForDay = events.find((e) => e.date === modalDay);
+
+			if (eventForDay) {
+				const eventDiv = document.createElement('div');
+				eventDiv.classList.add('event');
+				eventDiv.innerText = eventForDay.title;
+				daySquare.appendChild(eventDiv);
+			}
+			daySquare.addEventListener('click', () => openModal(modalDay));
 		} else {
 			daySquare.classList.add('padding');
 		}
@@ -70,6 +83,44 @@ function initButtons() {
 		nav--;
 		load();
 	});
+
+	document.getElementById('saveButton').addEventListener('click', saveEvent);
+	document.getElementById('cancelButton').addEventListener('click', closeModal);
+
+	document
+		.getElementById('deleteButton')
+		.addEventListener('click', deleteEvent);
+	document.getElementById('closeButton').addEventListener('click', closeModal);
+}
+
+function saveEvent() {
+	if (titleInputEvent.value) {
+		titleInputEvent.classList.remove('error');
+		events.push({
+			date: clicked,
+			title: titleInputEvent.value,
+		});
+		localStorage.setItem('events', JSON.stringify(events));
+		closeModal();
+	} else {
+		titleInputEvent.classList.add('error');
+	}
+}
+
+function deleteEvent() {
+	events = events.filter((e) => e.date !== clicked);
+	localStorage.setItem('events', JSON.stringify(events));
+	closeModal();
+}
+
+function closeModal() {
+	titleInputEvent.classList.remove('error');
+	newEventModal.style.display = 'none';
+	modalBackDrop.style.display = 'none';
+	deleteModal.style.display = 'none';
+	titleInputEvent.value = '';
+	clicked = null;
+	load();
 }
 
 function updateHeaderDivWithMonth(date, year) {
@@ -86,6 +137,20 @@ function updateHeaderDivWithMonth(date, year) {
 
 function capitalizeFirstLetter(string) {
 	return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function openModal(date) {
+	clicked = date;
+
+	const eventForDay = events.find((e) => e.date === clicked);
+
+	if (eventForDay) {
+		document.getElementById('eventText').innerText = eventForDay.title;
+		deleteModal.style.display = 'block';
+	} else {
+		newEventModal.style.display = 'block';
+	}
+	modalBackDrop.style.display = 'block';
 }
 
 initButtons();
