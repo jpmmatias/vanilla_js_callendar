@@ -58,6 +58,10 @@ function load() {
 			const modalDay = `${i - paddingDays}/${month + 1}/${year}`;
 			const eventForDay = events.find((e) => e.date === modalDay);
 
+			if (i - paddingDays === day && nav === 0) {
+				daySquare.id = 'currentDay';
+			}
+
 			if (eventForDay) {
 				const eventDiv = document.createElement('div');
 				eventDiv.classList.add('event');
